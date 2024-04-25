@@ -6,11 +6,17 @@ import UIKit
       var currentPage = 1
       let perPage = 6 // Number of items per page
       var isLoaded : Bool = false
-     var delegate: returnToApp?
-//     public override func viewDidLoad() {
+      var delegate: returnToApp?
+   
+     
+    public required init?(coder: NSCoder) {
+         fatalError("init(coder:) has not been implemented")
+     }
+     //     public override func viewDidLoad() {
 //        super.viewDidLoad()
 //         MyApiLibrary.load()
 //    }
+     
      open func load(viewx: UIView){
          view = UIView(frame: viewx.bounds)
          viewx.addSubview(view)
