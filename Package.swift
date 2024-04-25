@@ -5,19 +5,24 @@ import PackageDescription
 
 let package = Package(
     name: "MyApiLibrary",
+    platforms: [.iOS(.v17),
+               ],
     products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "MyApiLibrary",
             targets: ["MyApiLibrary"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.0.0"),
+        // Add other dependencies here if needed
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "MyApiLibrary"),
-        .testTarget(
-            name: "MyApiLibraryTests",
-            dependencies: ["MyApiLibrary"]),
+            name: "MyApiLibrary",
+        dependencies: ["Alamofire"]
+        ),
     ]
 )
+
