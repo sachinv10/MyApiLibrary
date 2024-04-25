@@ -6,11 +6,12 @@ import UIKit
       var currentPage = 1
       let perPage = 6 // Number of items per page
       var isLoaded : Bool = false
-//    override func viewDidLoad() {
+     var delegate: returnToApp?
+//     public override func viewDidLoad() {
 //        super.viewDidLoad()
-//        self.load()
+//         MyApiLibrary.load()
 //    }
-     public func load(viewx: UIView){
+     open func load(viewx: UIView){
          view = UIView(frame: viewx.bounds)
          viewx.addSubview(view)
         tableView = UITableView(frame: CGRect(x: 80, y: 300, width: 300, height: 200))
@@ -31,6 +32,7 @@ import UIKit
           print("Button tapped!")
         button.removeFromSuperview()
         tableView.removeFromSuperview()
+        delegate?.getData(email: users?.data.first?.email ?? "no email")
       }
     func fetchUsers(page: Int) {
         let dataManager = DataManager()
@@ -73,4 +75,6 @@ extension MyApiLibrary: UITableViewDataSource, UITableViewDelegate {
    
 }
 
-
+protocol returnToApp{
+    func getData(email: String)
+}
