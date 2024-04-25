@@ -1,5 +1,5 @@
 import UIKit
- class MyApiLibrary: UIViewController {
+ public class MyApiLibrary: UIViewController {
     var tableView: UITableView!
     let button = UIButton(type: .system)
     var users: UserDataResponse?
@@ -48,11 +48,11 @@ import UIKit
 }
 extension MyApiLibrary: UITableViewDataSource, UITableViewDelegate {
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return users?.data.count ?? 0
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .default, reuseIdentifier: "Cell")
         let user = users?.data[indexPath.row]
         cell.textLabel?.text = user?.email
@@ -60,7 +60,7 @@ extension MyApiLibrary: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         let lastRowIndex = tableView.numberOfRows(inSection: 0) - 1
         if  5 == lastRowIndex && isLoaded == false{
             // Reached the last row, load next page
