@@ -7,9 +7,11 @@ import UIKit
       let perPage = 6 // Number of items per page
       var isLoaded : Bool = false
       var delegate: returnToApp?
-   
+    public init() {
+        super.init(nibName: nil, bundle: nil)
+     }
      
-    public required init?(coder: NSCoder) {
+     required init?(coder: NSCoder) {
          fatalError("init(coder:) has not been implemented")
      }
      //     public override func viewDidLoad() {
