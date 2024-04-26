@@ -238,18 +238,3 @@ public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
         }
 }
 
-//struct User: Decodable {
-//    let id: Int
-//    let email: String
-//    let firstName: String
-//    let lastName: String
-//    let avatar: String
-//
-//    private enum CodingKeys: String, CodingKey {
-//        case id = "id", email = "email", firstName = "first_name", lastName = "last_name", avatar = "avatar"
-//    }
-//}
-//
-//struct UserResponse: Decodable {
-//    let data: [User]
-//}
