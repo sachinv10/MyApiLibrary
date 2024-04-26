@@ -95,7 +95,7 @@ public protocol CustomViewDelegate: AnyObject {
     func didSelectItem(atIndex index: Int)
 }
 
-public class ListView: UIView, UITableViewDelegate, UITableViewDataSource {
+public class MyApiLibrary: UIView, UITableViewDelegate, UITableViewDataSource {
 
     public var listView: UITableView!
     public var actionButton: UIButton!
