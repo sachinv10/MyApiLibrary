@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "MyApiLibrary",
-    platforms: [.iOS(.v17),
+    platforms: [.iOS(.v12),
                ],
     products: [
         .library(
