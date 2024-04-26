@@ -102,27 +102,26 @@ import Alamofire
 
 public protocol CustomViewDelegate: AnyObject {
     func didSelectItem(atIndex index: Int, user: [String: Any])
-  //  func customView(_ customView: CustomView, didSelectUser user: [String: Any])
 }
 
 public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
-    
+    public var currentPage = 1
     public var listView: UITableView!
     public var actionButton: UIButton!
-    
-    private var users: [User] = []
+    private var users: UserDataResponse?
+   // private var users: [User] = []
     public weak var delegate: CustomViewDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
-        fetchUsers()
+        fetchUsers(page: 1)
     }
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupViews()
-        fetchUsers()
+        fetchUsers(page: 1)
     }
     
     private func setupViews() {
@@ -133,7 +132,7 @@ public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
         listView.frame = bounds
         
         actionButton = UIButton(type: .system)
-        actionButton.setTitle("Back To Main", for: .normal)
+        actionButton.setTitle("Return to App", for: .normal)
         actionButton.titleLabel?.font = UIFont.systemFont(ofSize: 22)
         actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         addSubview(actionButton)
@@ -158,63 +157,99 @@ public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
     
     @objc private func buttonTapped() {
         removeFromSuperview()
-    }
-    
-    private func fetchUsers() {
-        AF.request("https://reqres.in/api/users?page=1").responseDecodable(of: UserResponse.self) { response in
-            switch response.result {
-            case .success(let userResponse):
-                self.users = userResponse.data
-                self.listView.reloadData()
-            case .failure(let error):
-                print("Error fetching users: \(error)")
-            }
+        if users?.data.count ?? 0 > 0{
+            let selectedUser = users!.data[0]
+             let userDictionary: [String: Any] = [
+                "id": selectedUser.id,
+                "email": selectedUser.email,
+                "firstName": selectedUser.first_name,
+                "lastName": selectedUser.last_name,
+                "avatar": selectedUser.avatar
+            ]
+            delegate?.didSelectItem(atIndex: 0, user: userDictionary)
         }
     }
+    
+       private func fetchUsers(page: Int) {
+            let dataManager = DataManager()
+            dataManager.fetchData (completion: { [self] result in
+                switch result {
+                case .success(let userDataResponse):
+                    self.users = userDataResponse
+                    self.listView.reloadData()
+                      print("Fetched users: \(userDataResponse.data)")
+                case .failure(let error):
+                      print("Error fetching data: \(error)")
+                }
+            }, pageNo: page)
+        }
+    
+//    private func fetchUsers() {
+//        AF.request("https://reqres.in/api/users?page=1").responseDecodable(of: UserResponse.self) { response in
+//            switch response.result {
+//            case .success(let userResponse):
+//                self.users = userResponse.data
+//                self.listView.reloadData()
+//            case .failure(let error):
+//                print("Error fetching users: \(error)")
+//            }
+//        }
+//    }
     
     // MARK: - UITableViewDataSource methods
     
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return users.count
+        return users?.data.count ?? 0
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
-        let user = users[indexPath.row]
-        cell.textLabel?.text = "\(user.firstName) \(user.lastName)"
-        cell.detailTextLabel?.text = user.email
+        if users!.data.count > 0{
+            let user = users!.data[indexPath.row]
+            cell.textLabel?.text = "\(user.first_name) \(user.last_name)"
+            cell.detailTextLabel?.text = user.email
+        }
         return cell
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
                     
-        let selectedUser = users[indexPath.row]
-        let userDictionary: [String: Any] = [
-            "id": selectedUser.id,
-            "email": selectedUser.email,
-            "firstName": selectedUser.firstName,
-            "lastName": selectedUser.lastName,
-            "avatar": selectedUser.avatar
-        ]
-        delegate?.didSelectItem(atIndex: indexPath.row, user: userDictionary)
-        removeFromSuperview()
-//        delegate?.customView(self, didSelectUser: userDictionary)
+//        let selectedUser = users[indexPath.row]
+//        let userDictionary: [String: Any] = [
+//            "id": selectedUser.id,
+//            "email": selectedUser.email,
+//            "firstName": selectedUser.firstName,
+//            "lastName": selectedUser.lastName,
+//            "avatar": selectedUser.avatar
+//        ]
+//        delegate?.didSelectItem(atIndex: indexPath.row, user: userDictionary)
+//        removeFromSuperview()
+////        delegate?.customView(self, didSelectUser: userDictionary)
     }
-    
+        public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+            let lastRowIndex = tableView.numberOfRows(inSection: 0) - 1
+            if  5 == lastRowIndex{
+                // Reached the last row, load next page
+                currentPage += 1
+                if currentPage < 3{
+                    fetchUsers(page: currentPage)
+                }
+            }
+        }
 }
 
-struct User: Decodable {
-    let id: Int
-    let email: String
-    let firstName: String
-    let lastName: String
-    let avatar: String
-
-    private enum CodingKeys: String, CodingKey {
-        case id = "id", email = "email", firstName = "first_name", lastName = "last_name", avatar = "avatar"
-    }
-}
-
-struct UserResponse: Decodable {
-    let data: [User]
-}
+//struct User: Decodable {
+//    let id: Int
+//    let email: String
+//    let firstName: String
+//    let lastName: String
+//    let avatar: String
+//
+//    private enum CodingKeys: String, CodingKey {
+//        case id = "id", email = "email", firstName = "first_name", lastName = "last_name", avatar = "avatar"
+//    }
+//}
+//
+//struct UserResponse: Decodable {
+//    let data: [User]
+//}
