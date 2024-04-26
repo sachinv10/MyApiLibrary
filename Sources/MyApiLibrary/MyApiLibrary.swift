@@ -90,71 +90,131 @@ import UIKit
 //}
 
 
+//public struct MyApiPackage {
+//    public private(set) var text = "Hello, World!"
+//
+//    public init() {
+//    }
+//}
+import Foundation
+import UIKit
+import Alamofire
 
 public protocol CustomViewDelegate: AnyObject {
-    func didSelectItem(atIndex index: Int)
+    func didSelectItem(atIndex index: Int, user: [String: Any])
+    func customView(_ customView: CustomView, didSelectUser user: [String: Any])
 }
 
-public class MyApiLibrary: UIView, UITableViewDelegate, UITableViewDataSource {
-
+public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
+    
     public var listView: UITableView!
     public var actionButton: UIButton!
+    
+    private var users: [User] = []
     public weak var delegate: CustomViewDelegate?
-
-    private var data: [String] = []
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
+        fetchUsers()
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupViews()
+        fetchUsers()
     }
-
+    
     private func setupViews() {
         listView = UITableView()
         listView.delegate = self
         listView.dataSource = self
-
-        actionButton = UIButton(type: .system)
-        actionButton.setTitle("Action", for: .normal)
-        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-
         addSubview(listView)
+        listView.frame = bounds
+        
+        actionButton = UIButton(type: .system)
+        actionButton.setTitle("Back To Main", for: .normal)
+        actionButton.titleLabel?.font = UIFont.systemFont(ofSize: 22)
+        actionButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         addSubview(actionButton)
-        // Add constraints
-
-        // Example data
-        data = ["Item 1", "Item 2", "Item 3"]
-        listView.reloadData()
+        
+        listView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            listView.topAnchor.constraint(equalTo: topAnchor),
+            listView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            listView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            listView.bottomAnchor.constraint(equalTo: actionButton.topAnchor, constant: -8)
+        ])
+        
+        // Add constraints for Button
+        actionButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            actionButton.leadingAnchor.constraint(equalTo: leadingAnchor),
+            actionButton.trailingAnchor.constraint(equalTo: trailingAnchor),
+            actionButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+            actionButton.heightAnchor.constraint(equalToConstant: 44) // Adjust height as needed
+        ])
     }
-
+    
     @objc private func buttonTapped() {
-        delegate?.didSelectItem(atIndex: 0)
+        removeFromSuperview()
     }
-
+    
+    private func fetchUsers() {
+        AF.request("https://reqres.in/api/users?page=1").responseDecodable(of: UserResponse.self) { response in
+            switch response.result {
+            case .success(let userResponse):
+                self.users = userResponse.data
+                self.listView.reloadData()
+            case .failure(let error):
+                print("Error fetching users: \(error)")
+            }
+        }
+    }
+    
     // MARK: - UITableViewDataSource methods
-
+    
     public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return data.count
+        return users.count
     }
-
+    
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
-        cell.textLabel?.text = data[indexPath.row]
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: nil)
+        let user = users[indexPath.row]
+        cell.textLabel?.text = "\(user.firstName) \(user.lastName)"
+        cell.detailTextLabel?.text = user.email
         return cell
     }
-
-    // MARK: - UITableViewDelegate methods
-
+    
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        delegate?.didSelectItem(atIndex: indexPath.row)
+                    
+        let selectedUser = users[indexPath.row]
+        let userDictionary: [String: Any] = [
+            "id": selectedUser.id,
+            "email": selectedUser.email,
+            "firstName": selectedUser.firstName,
+            "lastName": selectedUser.lastName,
+            "avatar": selectedUser.avatar
+        ]
+        delegate?.didSelectItem(atIndex: indexPath.row, user: userDictionary)
+        removeFromSuperview()
+//        delegate?.customView(self, didSelectUser: userDictionary)
     }
+    
+}
 
-    public func updateData(_ newData: [String]) {
-        data = newData
-        listView.reloadData()
+struct User: Decodable {
+    let id: Int
+    let email: String
+    let firstName: String
+    let lastName: String
+    let avatar: String
+
+    private enum CodingKeys: String, CodingKey {
+        case id = "id", email = "email", firstName = "first_name", lastName = "last_name", avatar = "avatar"
     }
+}
+
+struct UserResponse: Decodable {
+    let data: [User]
 }
