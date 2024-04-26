@@ -102,7 +102,7 @@ import Alamofire
 
 public protocol CustomViewDelegate: AnyObject {
     func didSelectItem(atIndex index: Int, user: [String: Any])
-    func customView(_ customView: CustomView, didSelectUser user: [String: Any])
+  //  func customView(_ customView: CustomView, didSelectUser user: [String: Any])
 }
 
 public class CustomView: UIView, UITableViewDelegate, UITableViewDataSource {
